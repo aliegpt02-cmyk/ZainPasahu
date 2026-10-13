@@ -16,21 +16,21 @@ workflows:
         - sdk
       vars:
         PACKAGE_NAME: "com.zain.pasahu"
+        JAVA_HOME: "/Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home" # إجبار السيرفر على استخدام جافا المتوافقة
     triggering:
       events:
         - push
     scripts:
       - name: Initialize Android Structure
         script: |
-          mkdir -p app/src/main/java/com/zain.pasahu
+          mkdir -p app/src/main/java/com/zain/pasahu
           mkdir -p app/src/main/res/layout
           
-          # نقل ملف الجافا للمسار الصحيح
           if [ -f MainActivity.java ]; then
             mv MainActivity.java app/src/main/java/com/zain/pasahu/MainActivity.java
           fi
           
-          # إنشاء ملف المانيفست بالصلاحيات الأمنية الكاملة للبلوتوث المزدوج
+          # حقن التصاريح الأمنية المزدوجة للبلوتوث
           cat <<EOF > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://android.com" package="com.zain.pasahu">
               <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -49,7 +49,6 @@ workflows:
           </manifest>
           EOF
           
-          # إنشاء ملف إعدادات المحرك لـ app
           cat <<EOF > app/build.gradle
           plugins { id 'com.android.application' }
           android {
@@ -62,6 +61,10 @@ workflows:
                   versionCode 1
                   versionName "1.0"
               }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_11
+                  targetCompatibility JavaVersion.VERSION_11
+              }
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -69,7 +72,6 @@ workflows:
           }
           EOF
           
-          # إنشاء ملف إعدادات الجذور الرئيسي
           cat <<EOF > build.gradle
           buildscript {
               repositories { google() ; mavenCentral() }
@@ -83,12 +85,12 @@ workflows:
           include ':app'
           EOF
           
-          # توليد ملف تشغيل gradle الحاسم وتخطي خطأ 127
           gradle wrapper --gradle-version 6.5
 
       - name: Build Android Debug APK
         script: |
           chmod +x gradlew
+          export JAVA_HOME=$JAVA_HOME
           ./gradlew assembleDebug
     artifacts:
       - app/build/outputs/apk/debug/*.apk
