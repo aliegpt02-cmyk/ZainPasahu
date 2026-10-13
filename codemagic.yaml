@@ -1,0 +1,90 @@
+publishing:
+  email:
+    recipients:
+      - aliegpt02-cmyk@github.com
+    notify:
+      success: true
+      failure: true
+
+workflows:
+  android-workflow:
+    name: Android Live APK Build
+    max_build_duration: 10
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - sdk
+      vars:
+        PACKAGE_NAME: "com.zain.pasahu"
+    triggering:
+      events:
+        - push
+    scripts:
+      - name: Initialize Android Structure
+        script: |
+          mkdir -p app/src/main/java/com/zain/pasahu
+          mkdir -p app/src/main/res/layout
+          
+          # نقل ملف الجافا للمسار الصحيح
+          if [ -f MainActivity.java ]; then
+            mv MainActivity.java app/src/main/java/com/zain/pasahu/MainActivity.java
+          fi
+          
+          # إنشاء ملف المانيفست بالصلاحيات الأمنية الكاملة للبلوتوث المزدوج
+          cat <<EOF > app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://android.com" package="com.zain.pasahu">
+              <uses-permission android:name="android.permission.BLUETOOTH" />
+              <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+              <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+              <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+              <application android:label="ZAIN PASAHU" android:theme="@style/Theme.AppCompat.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+          
+          # إنشاء ملف إعدادات المحرك
+          cat <<EOF > build.gradle
+          plugins { id 'com.android.application' }
+          android {
+              compileSdkVersion 30
+              buildToolsVersion "30.0.3"
+              defaultConfig {
+                  applicationId "com.zain.pasahu"
+                  minSdkVersion 21
+                  targetSdkVersion 30
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.3.1'
+              implementation 'com.google.android.material:material:1.4.0'
+          }
+          EOF
+          
+          cat <<EOF > settings.gradle
+          rootProject.name = "ZainPasahu"
+          include ':app'
+          EOF
+          
+          mv build.gradle app/build.gradle
+          cat <<EOF > build.gradle
+          buildscript {
+              repositories { google() ; mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:4.1.3' }
+          }
+          allprojects { repositories { google() ; mavenCentral() } }
+          EOF
+
+      - name: Build Android Debug APK
+        script: |
+          ./gradlew assembleDebug
+    artifacts:
+      - app/build/outputs/apk/debug/*.apk
