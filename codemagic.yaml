@@ -23,8 +23,13 @@ workflows:
     scripts:
       - name: Build Android Debug APK
         script: |
-          chmod +x gradlew
           export JAVA_HOME=$JAVA_HOME
+          
+          # توليد ملفات المحرك التنفيذي تلقائياً داخل السحابة وتخطي خطأ 127
+          gradle wrapper --gradle-version 6.5
+          
+          # منح صلاحيات التشغيل الصارمة للمحرك والبدء بالتجميع الفوري
+          chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
       - app/build/outputs/apk/debug/*.apk
