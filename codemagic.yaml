@@ -22,7 +22,7 @@ workflows:
     scripts:
       - name: Initialize Android Structure
         script: |
-          mkdir -p app/src/main/java/com/zain/pasahu
+          mkdir -p app/src/main/java/com/zain.pasahu
           mkdir -p app/src/main/res/layout
           
           # نقل ملف الجافا للمسار الصحيح
@@ -49,8 +49,8 @@ workflows:
           </manifest>
           EOF
           
-          # إنشاء ملف إعدادات المحرك
-          cat <<EOF > build.gradle
+          # إنشاء ملف إعدادات المحرك لـ app
+          cat <<EOF > app/build.gradle
           plugins { id 'com.android.application' }
           android {
               compileSdkVersion 30
@@ -69,12 +69,7 @@ workflows:
           }
           EOF
           
-          cat <<EOF > settings.gradle
-          rootProject.name = "ZainPasahu"
-          include ':app'
-          EOF
-          
-          mv build.gradle app/build.gradle
+          # إنشاء ملف إعدادات الجذور الرئيسي
           cat <<EOF > build.gradle
           buildscript {
               repositories { google() ; mavenCentral() }
@@ -82,9 +77,18 @@ workflows:
           }
           allprojects { repositories { google() ; mavenCentral() } }
           EOF
+          
+          cat <<EOF > settings.gradle
+          rootProject.name = "ZainPasahu"
+          include ':app'
+          EOF
+          
+          # توليد ملف تشغيل gradle الحاسم وتخطي خطأ 127
+          gradle wrapper --gradle-version 6.5
 
       - name: Build Android Debug APK
         script: |
+          chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
       - app/build/outputs/apk/debug/*.apk
