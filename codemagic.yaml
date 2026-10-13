@@ -16,7 +16,7 @@ workflows:
         - sdk
       vars:
         PACKAGE_NAME: "com.zain.pasahu"
-        JAVA_HOME: "/Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home" # إجبار السيرفر على استخدام جافا المتوافقة
+        JAVA_HOME: "/Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home"
     triggering:
       events:
         - push
@@ -83,6 +83,12 @@ workflows:
           cat <<EOF > settings.gradle
           rootProject.name = "ZainPasahu"
           include ':app'
+          EOF
+          
+          # حل مشكلة الفحص وحقن تفعيل خاصية AndroidX برمجياً وتخطي عطل الميتاداتا
+          cat <<EOF > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
           EOF
           
           gradle wrapper --gradle-version 6.5
