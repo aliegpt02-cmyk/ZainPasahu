@@ -20,19 +20,13 @@ workflows:
       events:
         - push
     scripts:
-      - name: Clean and Prepare Environment
+      - name: Build Android Debug APK
         script: |
           export JAVA_HOME=$JAVA_HOME
           
-          # إجبار السيرفر على مسح أي ملفات توليد قديمة معلقة في الجذور الخارجية
-          rm -f AndroidManifest.xml MainActivity.java build.gradle settings.gradle gradle.properties
-          
-          # بناء محرك التشغيل التنفيذي النظيف
-          gradle wrapper --gradle-version 7.5
-
-      - name: Build Android Debug APK
-        script: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          # الدخول للمسار المباشر ومباشرة الضغط والتجميع فوراً
+          chmod +x app/build.gradle
+          gradle assembleDebug
     artifacts:
       - app/build/outputs/apk/debug/*.apk
+      
