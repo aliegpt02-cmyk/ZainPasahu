@@ -21,17 +21,55 @@ workflows:
       events:
         - push
     scripts:
-      - name: Build Android Debug APK
+      - name: Initialize Android Structure
         script: |
           export JAVA_HOME=$JAVA_HOME
           
-          # مسح أي بقايا لملفات توليد قديمة وتأمين شجرة مشروع الأندرويد الصريحة
-          rm -f AndroidManifest.xml MainActivity.java build.gradle settings.gradle gradle.properties
+          # إنشاء هيكل مجلدات التطبيق الداخلي المتوافق
+          mkdir -p app/src/main/java/com/zain/pasahu
           
-          # توليد محرك التشغيل السحابي النظيف
-          gradle wrapper --gradle-version 6.5
+          # تأمين نقل ملف الجافا للمسار البرمجي الصحيح
+          if [ -f MainActivity.java ]; then
+            mv MainActivity.java app/src/main/java/com/zain/pasahu/MainActivity.java
+          fi
           
-          # منح صلاحيات التشغيل والبدء بالتجميع الصافي من مجلد app
+          # توليد ملفات الضبط للمشروع الحديث لتخطي فحص الجذور
+          cat <<'EOF' > settings.gradle
+          rootProject.name = "ZainPasahu"
+          include ':app'
+          EOF
+          
+          cat <<'EOF' > build.gradle
+          buildscript {
+              repositories { google() ; mavenCentral() }
+              dependencies { classpath 'com.android.tools.build:gradle:7.4.2' }
+          }
+          allprojects { repositories { google() ; mavenCentral() } }
+          EOF
+          
+          cat <<'EOF' > app/build.gradle
+          plugins { id 'com.android.application' }
+          android {
+              compileSdkVersion 33
+              defaultConfig {
+                  applicationId "com.zain.pasahu"
+                  minSdkVersion 21
+                  targetSdkVersion 33
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.9.0'
+          }
+          EOF
+          
+          # توليد محرك التشغيل التنفيذي المتوافق مع البيئة الحديثة
+          gradle wrapper --gradle-version 7.5
+
+      - name: Build Android Debug APK
+        script: |
           chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
