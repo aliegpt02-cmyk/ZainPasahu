@@ -25,10 +25,13 @@ workflows:
         script: |
           export JAVA_HOME=$JAVA_HOME
           
-          # توليد ملفات المحرك التنفيذي تلقائياً داخل السحابة وتخطي خطأ 127
+          # مسح أي بقايا لملفات توليد قديمة وتأمين شجرة مشروع الأندرويد الصريحة
+          rm -f AndroidManifest.xml MainActivity.java build.gradle settings.gradle gradle.properties
+          
+          # توليد محرك التشغيل السحابي النظيف
           gradle wrapper --gradle-version 6.5
           
-          # منح صلاحيات التشغيل الصارمة للمحرك والبدء بالتجميع الفوري
+          # منح صلاحيات التشغيل والبدء بالتجميع الصافي من مجلد app
           chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:
