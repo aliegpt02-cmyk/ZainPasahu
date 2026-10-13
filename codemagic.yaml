@@ -30,8 +30,8 @@ workflows:
             mv MainActivity.java app/src/main/java/com/zain/pasahu/MainActivity.java
           fi
           
-          # حقن التصاريح الأمنية المزدوجة للبلوتوث
-          cat <<EOF > app/src/main/AndroidManifest.xml
+          # تأمين النص بوضع 'EOF' لمنع حذف الصلاحيات وأسماء الحزم
+          cat <<'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://android.com" package="com.zain.pasahu">
               <uses-permission android:name="android.permission.BLUETOOTH" />
               <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -49,7 +49,7 @@ workflows:
           </manifest>
           EOF
           
-          cat <<EOF > app/build.gradle
+          cat <<'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
           android {
               compileSdkVersion 30
@@ -72,7 +72,7 @@ workflows:
           }
           EOF
           
-          cat <<EOF > build.gradle
+          cat <<'EOF' > build.gradle
           buildscript {
               repositories { google() ; mavenCentral() }
               dependencies { classpath 'com.android.tools.build:gradle:4.1.3' }
@@ -80,13 +80,12 @@ workflows:
           allprojects { repositories { google() ; mavenCentral() } }
           EOF
           
-          cat <<EOF > settings.gradle
+          cat <<'EOF' > settings.gradle
           rootProject.name = "ZainPasahu"
           include ':app'
           EOF
           
-          # حل مشكلة الفحص وحقن تفعيل خاصية AndroidX برمجياً وتخطي عطل الميتاداتا
-          cat <<EOF > gradle.properties
+          cat <<'EOF' > gradle.properties
           android.useAndroidX=true
           android.enableJetifier=true
           EOF
